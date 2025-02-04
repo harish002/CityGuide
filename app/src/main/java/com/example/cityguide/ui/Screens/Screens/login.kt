@@ -59,26 +59,25 @@ fun LoginScreen(votesList: MutableMap<String, Boolean>, navController: NavHostCo
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 30.dp)
-                    .size(200.dp),
-                contentAlignment = Alignment.BottomCenter
 
-            ) {
+                Spacer(modifier = Modifier.padding(top = 40.dp))
+
                 Image(
-                    painter = painterResource(R.drawable.app_logo),
+                    painter = painterResource(R.drawable.logopreview),
                     contentDescription = "app logo",
                     modifier = Modifier.fillMaxWidth()
-                        .align(Alignment.BottomCenter)
                 )
+
+                Spacer(modifier = Modifier.padding(top = 8.dp))
+
                 Text(
                     "City Guide App",
                     fontWeight = FontWeight.Bold,
                     fontSize = 26.sp
                 )
-            }
 
+
+            Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
             custTextInput(label = "Usename",
                 value = username,
@@ -98,7 +97,9 @@ fun LoginScreen(votesList: MutableMap<String, Boolean>, navController: NavHostCo
                     user = User(username, Password),
                     mAuth = mAuth
                 )
-            })
+            },
+                modifier = Modifier.fillMaxWidth(0.5f)
+            )
             {
                 Text("Login")
             }
@@ -106,8 +107,10 @@ fun LoginScreen(votesList: MutableMap<String, Boolean>, navController: NavHostCo
             Spacer(modifier = Modifier.padding(10.dp))
 
             Button(onClick = {
-                navController.navigate("register")
-            }) {
+                    navController.navigate("register")
+                },
+                modifier = Modifier.fillMaxWidth(0.5f)
+            ) {
                 Text("Register")
             }
             Spacer(modifier = Modifier.padding(10.dp))

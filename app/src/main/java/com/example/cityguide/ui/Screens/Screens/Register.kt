@@ -31,9 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -51,77 +53,91 @@ fun RegisterScreen(navController: NavHostController) {
     val context = LocalContext.current
     val mAuth = FirebaseAuth.getInstance()
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        item {
+
             Box(
-                modifier = Modifier
-                    .padding(top = 30.dp)
-                    .size(200.dp),
-                contentAlignment = Alignment.BottomCenter
-
+                modifier = Modifier.fillMaxSize()
             ) {
+
                 Image(
-                    painter = painterResource(R.drawable.app_logo),
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds,
+                    painter = painterResource(R.drawable.cityapp_background),
                     contentDescription = "app logo",
-                    modifier = Modifier.fillMaxWidth()
-                        .align(Alignment.BottomCenter)
                 )
-                Text(
-                    "City Guide App",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 26.sp
-                )
-            }
-            custTextInput(label = "Username", value = username, onValueChange = { username = it })
-            Spacer(modifier = Modifier.padding(10.dp))
 
-            custTextInput(label = "Password", value = password, onValueChange = { password = it })
-            Spacer(modifier = Modifier.padding(10.dp))
+                Column(
+                    Modifier.padding(18.dp, 12.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
 
-            custTextInput(label = "Email", value = email, onValueChange = { email = it })
-            Spacer(modifier = Modifier.padding(10.dp))
+                    Spacer(modifier = Modifier.padding(top = 12.dp))
+                    Image(
+                        painter = painterResource(R.drawable.logopreview),
+                        contentDescription = "app logo",
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        "City Guide App",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 26.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.padding(6.dp))
 
-            custTextInput(label = "Phone", value = phone, onValueChange = { phone = it })
-            Spacer(modifier = Modifier.padding(10.dp))
+                    custTextInput(
+                        label = "Username",
+                        value = username,
+                        onValueChange = { username = it })
+                    Spacer(modifier = Modifier.padding(6.dp))
+
+                    custTextInput(
+                        label = "Password",
+                        value = password,
+                        onValueChange = { password = it })
+                    Spacer(modifier = Modifier.padding(6.dp))
+
+                    custTextInput(label = "Email", value = email, onValueChange = { email = it })
+                    Spacer(modifier = Modifier.padding(6.dp))
+
+                    custTextInput(label = "Phone", value = phone, onValueChange = { phone = it })
+                    Spacer(modifier = Modifier.padding(6.dp))
 
 
+                    Spacer(modifier = Modifier.padding(10.dp))
 
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Button(onClick = {
+                            navController.navigate("login")
+                        },
+                            modifier = Modifier.weight(0.5f)
+                        ) {
+                            Text("Login")
+                        }
 
+                        Spacer(modifier = Modifier.padding(10.dp))
 
-            Spacer(modifier = Modifier.padding(20.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                Button(onClick = {
-                    navController.navigate("login")
-                }) {
-                    Text("Login")
-                }
-
-                Spacer(modifier = Modifier.padding(10.dp))
-
-                Button(
-                    enabled = (password.isNotBlank() && username.isNotBlank() && email.isNotBlank() && phone.isNotBlank()),
-                    onClick = {
-                        registerNewUser(
-                            context,
-                            mAuth,
-                            UserRegister(username, password, phone, email),
-                            navController
-                        )
-                    }) {
-                    Text("Register")
+                        Button(
+                            enabled = (password.isNotBlank() && username.isNotBlank() && email.isNotBlank() && phone.isNotBlank()),
+                            onClick = {
+                                registerNewUser(
+                                    context,
+                                    mAuth,
+                                    UserRegister(username, password, phone, email),
+                                    navController
+                                )
+                            },
+                            modifier = Modifier.weight(0.5f)
+                        ) {
+                            Text("Register")
+                        }
+                    }
                 }
             }
         }
-    }
-}
 
 
 fun registerNewUser(

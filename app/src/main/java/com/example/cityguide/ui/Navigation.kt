@@ -21,7 +21,7 @@ fun NavGraph(navController: NavHostController) {
     Surface(modifier = Modifier.fillMaxSize()) {
         NavHost(
             navController = navController,
-            startDestination = "user"
+            startDestination = "login"
         ) {
             composable("login") {
                 LoginScreen(votesList, navController)

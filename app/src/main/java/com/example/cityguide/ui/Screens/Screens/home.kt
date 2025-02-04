@@ -5,16 +5,22 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Parcelable
 import android.util.Log
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,8 +31,14 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,17 +47,23 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,7 +73,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.CityStateData
 import com.Data
+import com.example.cityguideapp.R
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import kotlinx.android.parcel.Parcelize
 
@@ -180,7 +200,7 @@ fun User(
                 title = {/* No title */ }, // Leave the title empty or omit this line
                 navigationIcon = {
 //                    if (scrollBehavior.state.collapsedFraction < 1f) {
-                    CircularProfile(name) // Replace with dynamic data from api
+                    CircularProfile(name,mAuth) // Replace with dynamic data from api
 //                    }
                 },
 //                scrollBehavior = scrollBehavior,
@@ -302,10 +322,12 @@ fun User(
 //        }
         Column (Modifier.fillMaxSize()
             .padding(it)){
-            Text(modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                text = "Select State to see Cities",
-                fontSize = 20.sp, fontWeight = FontWeight.Bold)
+
+//            Text(modifier = Modifier.fillMaxWidth(),
+//                textAlign = TextAlign.Center,
+//                text = "Select State to see Cities",
+//                fontSize = 20.sp, fontWeight = FontWeight.Bold)
+
             StateGridScreen(navController, stateCity1)
         }
     }
@@ -314,37 +336,47 @@ fun User(
 
 @SuppressLint("RestrictedApi")
 @Composable
-fun CircularProfile(userData: String?) {
-    val userName = userData
+fun CircularProfile(userData: String?, mAuth: FirebaseAuth) {
+    var userName = userData
+    val id = mAuth.currentUser?.uid
     val initials = userName?.split(" ")?.joinToString("") { it.take(1) }?.uppercase()
+
+    val role = remember { mutableStateOf<String?>(null) }
+
+    // State to manage the dialog visibility
+    val showProfileDialog = remember { mutableStateOf(false) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier.padding(8.dp) // Optional padding for the row
+        modifier = Modifier
+            .navigationBarsPadding()
+            .padding(top = 30.dp, start = 8.dp)
     ) {
         // Circular Profile Icon
         Box(
             modifier = Modifier
-                .size(60.dp) // Size of the circular icon
+                .size(50.dp)
                 .background(
-                    MaterialTheme.colorScheme.background,
+                    Color.White,
                     shape = CircleShape
-                ) // Circular shape with background color
-                .border(2.dp, Color.White, shape = CircleShape) // Optional border
-                .padding(8.dp), // Padding inside the circle
+                )
+                .border(2.dp, Color.Black, shape = CircleShape)
+                .padding(8.dp)
+                .clickable { showProfileDialog.value = true }, // Show dialog on tap
             contentAlignment = Alignment.Center
         ) {
             if (initials != null) {
                 Text(
                     text = initials,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 20.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
 
-        Spacer(modifier = Modifier.width(8.dp)) // Space between icon and text
+        Spacer(modifier = Modifier.width(8.dp))
+
         // Welcome Message
         Column {
             Text(
@@ -358,13 +390,104 @@ fun CircularProfile(userData: String?) {
                 Text(
                     text = it,
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Light
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal
                 )
             }
         }
     }
 
+    // Profile Dialog
+    if (showProfileDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showProfileDialog.value = false },
+            title = { Text("Profile Details") },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    var number = remember { mutableStateOf<String?>(null) }
+                    var name = remember { mutableStateOf<String?>(null) }
+                    val databaseRef = id?.let { FirebaseDatabase.getInstance().getReference("users").child(it) }
+                    if (databaseRef != null) {
+                        databaseRef.child("phone").get().addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val phone = task.result?.value as? String
+                                // Use the fetched phone number
+                                number.value = phone
+
+                                Log.d("PhoneNumber", "Fetched phone: $phone")
+                            } else {
+                                // Handle failure
+                                number.value = null
+                                Log.e("PhoneNumber", "Failed to fetch phone number", task.exception)
+                            }
+                        }
+
+                        databaseRef.child("username").get().addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val username = task.result?.value as? String
+                                // Use the fetched phone number
+                                name.value = username
+
+                                Log.d("Username", "Fetched phone: $username")
+                            } else {
+                                // Handle failure
+                                name.value = null
+                                Log.e("PhoneNumber", "Failed to fetch phone number", task.exception)
+                            }
+                        }
+                    }
+
+
+
+                    ProfileItem(icon = Icons.Default.AccountCircle, text = "Username", value = "${name.value?.capitalize()}")
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    ProfileItem(icon = Icons.Default.Email, text = "Email-Id", value = mAuth.currentUser?.email ?: "Not available")
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    ProfileItem(icon = Icons.Default.Phone, text = "Phone", value = number.value ?: "Not available")
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+
+
+                    // Add more details as needed
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showProfileDialog.value = false }) {
+                    Text("Close")
+                }
+            },
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Composable
+fun ProfileItem(icon: ImageVector, text: String, value: String) {
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier.padding(vertical = 4.dp)
+        ) {
+            Icon(imageVector = icon, contentDescription = text, modifier = Modifier.size(24.dp))
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Text(text = text, style = MaterialTheme.typography.bodyLarge,fontSize = 18.sp)
+
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(text = value, style = MaterialTheme.typography.bodyLarge, fontSize = 20.sp, modifier = Modifier.padding(start = 6.dp), fontWeight = FontWeight.Bold)
+    }
 
 }
 
@@ -510,32 +633,70 @@ fun StateDetailsScreen(navController: NavController) {
 
     val stateName = stateData.first().State
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(horizontal = 6.dp,16.dp)) {
-        Text(text = "State: $stateName", fontWeight = FontWeight.Bold, fontSize = 22.sp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp)
+            .padding(top = 30.dp)
+    ) {
+        Text(
+            text = "State: $stateName",
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp,
+            modifier = Modifier.padding(16.dp)
+        )
 
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2), // Adjust for the desired number of columns
-            modifier = Modifier.padding(8.dp)
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(stateData) { city ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(2.dp)
+                        .height(240.dp)
+                        .padding(4.dp)
                         .clickable {
                             val uri = Uri.parse("geo:${city.Latitude},${city.Longitude}?q=${city.Latitude},${city.Longitude}(${city.Name})")
                             val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-                                setPackage("com.google.android.apps.maps") // Open only in Google Maps
+                                setPackage("com.google.android.apps.maps") // Open in Google Maps
                             }
                             context.startActivity(intent)
                         },
+                    shape = RoundedCornerShape(12.dp)
+
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "${city.Name}", fontSize = 18.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
-//                        Text(text = "Type: ${city.Type}", fontSize = 14.sp)
-                        Text(text = "-${city.City}", fontSize = 14.sp)
+                    Column(modifier = Modifier.padding(8.dp)) {
+
+                        Image(
+                            painter = painterResource(id = R.drawable.location),
+                            contentDescription = "App Logo",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Spacer(modifier = Modifier.padding(vertical = 8.dp))
+
+                        Text(
+                            text = city.Name,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = city.City,
+                            fontSize = 16.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        )
                     }
                 }
             }
@@ -551,22 +712,23 @@ fun StateGridScreen(navController: NavController, stateCityList: StateCityDataC)
     val groupedByState = stateCityList.groupBy { it.State }
     val gridState = rememberLazyGridState()
 
-
     LazyVerticalGrid(
         columns = GridCells.Fixed(2), // 2 columns per row
         state = gridState,
         modifier = Modifier
             .fillMaxSize()
-
-        ,
-        contentPadding = PaddingValues(8.dp),
+            .padding(8.dp),
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         groupedByState.forEach { (state, cities) ->
             item {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .height(240.dp)
+                        .padding(6.dp)
                         .clickable {
                             val stateData = ArrayList(cities) // Convert to Parcelable list
                             navController.currentBackStackEntry?.savedStateHandle?.set(
@@ -575,20 +737,72 @@ fun StateGridScreen(navController: NavController, stateCityList: StateCityDataC)
                             )
                             navController.navigate("state_details")
                         },
-                    elevation = CardDefaults.cardElevation(4.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(6.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
-                    Box(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = state,
-                            fontSize = 18.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    Box(modifier = Modifier.padding(12.dp)) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            // Use the function to get the image for each state
+                            Image(
+                                painter = painterResource(id = getStateImage(state)),
+                                contentDescription = "$state Image",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(130.dp)
+                                    .clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+
+                            Spacer(modifier = Modifier.padding(top = 12.dp))
+
+                            Text(
+                                text = state,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@DrawableRes
+fun getStateImage(state: String): Int {
+    return when (state) {
+        "Delhi" -> R.drawable.delhi
+        "Maharashtra" -> R.drawable.maharashtra
+        "Uttar Pradesh" -> R.drawable.uttarpradesh
+        "Rajasthan" -> R.drawable.rajasthan
+        "Karnataka" -> R.drawable.karnataka
+        "Gujarat" -> R.drawable.gujarat
+        "West Bengal" -> R.drawable.westbengal
+        "Tamil Nadu" -> R.drawable.tamilnadu
+        "Madhya Pradesh" -> R.drawable.madhyapradesh
+        "Punjab" -> R.drawable.punjab
+        "Haryana" -> R.drawable.haryana
+        "Bihar" -> R.drawable.bihar
+        "Kerala" -> R.drawable.kerela
+        "Telangana" -> R.drawable.telengana
+        "Odisha" -> R.drawable.odisha
+        "Andhra Pradesh" -> R.drawable.andhra
+        "Assam" -> R.drawable.assam
+        "Uttarakhand" -> R.drawable.uttarakhand
+        "Ladakh" -> R.drawable.ladakh
+        "Jharkhand" -> R.drawable.jharkhand
+        "Meghalaya" -> R.drawable.meghalaya
+        "Daman and Diu" -> R.drawable.daman
+        "Jammu and Kashmir" -> R.drawable.jammukashmir
+        "Goa" -> R.drawable.goa
+        else -> R.drawable.states // Default Image for Unknown States
     }
 }
