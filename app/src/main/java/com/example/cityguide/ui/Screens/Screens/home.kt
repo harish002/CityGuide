@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -511,15 +512,18 @@ fun StateDetailsScreen(navController: NavController) {
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .padding(16.dp)) {
+        .padding(horizontal = 6.dp,16.dp)) {
         Text(text = "State: $stateName", fontWeight = FontWeight.Bold, fontSize = 22.sp)
 
-        LazyColumn {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2), // Adjust for the desired number of columns
+            modifier = Modifier.padding(8.dp)
+        ) {
             items(stateData) { city ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(2.dp)
                         .clickable {
                             val uri = Uri.parse("geo:${city.Latitude},${city.Longitude}?q=${city.Latitude},${city.Longitude}(${city.Name})")
                             val intent = Intent(Intent.ACTION_VIEW, uri).apply {
@@ -529,9 +533,9 @@ fun StateDetailsScreen(navController: NavController) {
                         },
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Name: ${city.Name}", fontSize = 18.sp)
-                        Text(text = "Type: ${city.Type}", fontSize = 14.sp)
-                        Text(text = "City: ${city.City}", fontSize = 18.sp)
+                        Text(text = "${city.Name}", fontSize = 18.sp, minLines = 2, maxLines = 2, overflow = TextOverflow.Ellipsis)
+//                        Text(text = "Type: ${city.Type}", fontSize = 14.sp)
+                        Text(text = "-${city.City}", fontSize = 14.sp)
                     }
                 }
             }
