@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -39,6 +40,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -183,152 +186,92 @@ fun User(
 
 
     var selectedState by remember { mutableStateOf<String?>(null) }
-    val gson = Gson()
-    // Deserialize JSON into StateCity object
-//  val stateCity: StateCity = gson.fromJson(Data, StateCity::class.java)
-
-    val stateCity1: StateCityDataC =
-        gson.fromJson(CityStateData, StateCityDataC::class.java)
-
-    val groupedByState = stateCity1.groupBy { it.State } // Group cities by state
 
 
+    Scaffold{
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {/* No title */ }, // Leave the title empty or omit this line
-                navigationIcon = {
-//                    if (scrollBehavior.state.collapsedFraction < 1f) {
-                    CircularProfile(name,mAuth) // Replace with dynamic data from api
-//                    }
-                },
-//                scrollBehavior = scrollBehavior,
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    navigationIconContentColor = Color.Black,
-                    actionIconContentColor = Color.LightGray,
-                )
+        Column (Modifier
+            .padding(12.dp)
+            .fillMaxSize()
+        ){
+            val items = listOf(
+                Pair("Explore", R.drawable.states) to { navController.navigate("explore") },
+                Pair("About Us", R.drawable.aboutus) to { navController.navigate("about_us") },
+                Pair("Contact Us", R.drawable.contact) to { navController.navigate("contact_us") },
+                Pair("Feedback", R.drawable.feedback) to { navController.navigate("feedback") },
+                Pair("Emergency Contacts", R.drawable.emergency) to { navController.navigate("emergency") }
             )
-        }
-    ) {
-//        LazyColumn(
-//            modifier = Modifier
-//                .padding(it)
-//                .padding(16.dp)
-//                .fillMaxSize(),
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            item {
-//                Text("City Guide App Dashboard", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-//            }
-//
-//
-//            Log.d("test statecity", stateCity1.toString())
-//
-//            groupedByState.forEach { (state, cities) ->
-//                item {
-//                    Text(state, fontWeight = FontWeight.Bold,
-//                        fontSize = 18.sp,
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .clickable {
-//                                val stateData = ArrayList(cities) // Convert to ArrayList (Parcelable requirement)
-//                                navController.currentBackStackEntry?.savedStateHandle?.set("stateData", stateData)
-//                                navController.navigate("state_details")
-//                            }
-//                            .padding(8.dp)) // State Name
-//                }
-//
-//            }
-////                items(stateCity1){
-////                        i->
-////                    Text(i.State)
-////                }
-//
-//            // Convert StateCity object into a map for easier access
-////            val stateMap = mapOf(
-////                "Andaman and Nicobar Islands" to stateCity.AndamanandNicobarIslands,
-////                "Andhra Pradesh" to stateCity.AndhraPradesh,
-////                "Arunachal Pradesh" to stateCity.ArunachalPradesh,
-////                "Assam" to stateCity.Assam,
-////                "Bihar" to stateCity.Bihar,
-////                "Chandigarh" to stateCity.Chandigarh,
-////                "Chhattisgarh" to stateCity.Chhattisgarh,
-////                "Dadra and Nagar Haveli" to stateCity.DadraandNagarHaveli,
-////                "Delhi" to stateCity.Delhi,
-////                "Goa" to stateCity.Goa,
-////                "Gujarat" to stateCity.Gujarat,
-////                "Haryana" to stateCity.Haryana,
-////                "Himachal Pradesh" to stateCity.HimachalPradesh,
-////                "Jammu and Kashmir" to stateCity.JammuandKashmir,
-////                "Jharkhand" to stateCity.Jharkhand,
-////                "Karnataka" to stateCity.Karnataka,
-////                "Kerala" to stateCity.Kerala,
-////                "Madhya Pradesh" to stateCity.MadhyaPradesh,
-////                "Maharashtra" to stateCity.Maharashtra,
-////                "Manipur" to stateCity.Manipur,
-////                "Meghalaya" to stateCity.Meghalaya,
-////                "Mizoram" to stateCity.Mizoram,
-////                "Nagaland" to stateCity.Nagaland,
-////                "Odisha" to stateCity.Odisha,
-////                "Puducherry" to stateCity.Puducherry,
-////                "Punjab" to stateCity.Punjab,
-////                "Rajasthan" to stateCity.Rajasthan,
-////                "Tamil Nadu" to stateCity.TamilNadu,
-////                "Telangana" to stateCity.Telangana,
-////                "Tripura" to stateCity.Tripura,
-////                "Uttar Pradesh" to stateCity.UttarPradesh,
-////                "Uttarakhand" to stateCity.Uttarakhand,
-////                "West Bengal" to stateCity.WestBengal
-////            )
-////
-////
-////
-////            // Display all states
-////            stateMap.forEach { (state, cities) ->
-////                item {
-////                    Column {
-////                        Text(
-////                            text = state,
-////                            fontSize = 18.sp,
-////                            fontWeight = FontWeight.SemiBold,
-////                            modifier = Modifier
-////                                .fillMaxWidth()
-////                                .clickable {
-////                                    navController.navigate("city_list/${state}")
-//////                                selectedState = if (selectedState == state) null else state
-////                                }
-////                                .padding(8.dp)
-////                        )
-////
-////                        // Show cities if the state is selected
-////                        if (selectedState == state) {
-////                            cities.forEach { city ->
-////                                Text(
-////                                    text = "• $city",
-////                                    fontSize = 16.sp,
-////                                    modifier = Modifier
-////                                        .fillMaxWidth()
-////                                        .padding(start = 16.dp, top = 4.dp)
-////                                )
-////                            }
-////                        }
-////                    }
-////                }
-////            }
-//
-//
-//        }
-        Column (Modifier.fillMaxSize()
-            .padding(it)){
 
-//            Text(modifier = Modifier.fillMaxWidth(),
-//                textAlign = TextAlign.Center,
-//                text = "Select State to see Cities",
-//                fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            CircularProfile(name,mAuth)
 
-            StateGridScreen(navController, stateCity1)
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(0.9f).padding(horizontal = 4.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(items) { (item, action) ->
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .clickable { action() },
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.elevatedCardElevation(4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(vertical = 12.dp)
+                                .padding(horizontal = 12.dp)
+                            ,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = item.second),
+                                contentDescription = item.first,
+                                modifier = Modifier.size(100.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = item.first,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+            }
+
+
+            Button(
+                onClick = {
+                    mAuth.signOut()
+                    navController.navigate("login") {
+                        popUpTo(0) { inclusive = true } // Clears the entire backstack
+                        launchSingleTop = true // Prevents duplicate destinations
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    contentColor = Color.White,
+                    disabledContainerColor = Color.Gray,
+                    disabledContentColor = Color.White
+                )
+            ) {
+                Text(
+                    "Logout",
+                    modifier = Modifier.padding(vertical = 6.dp),
+                    color = Color.White
+                )
+            }
+
         }
     }
 }
@@ -639,12 +582,21 @@ fun StateDetailsScreen(navController: NavController) {
             .padding(horizontal = 8.dp)
             .padding(top = 30.dp)
     ) {
-        Text(
-            text = "State: $stateName",
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            modifier = Modifier.padding(16.dp)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            }
+
+            Text(
+                text = "State: $stateName",
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -708,72 +660,94 @@ fun StateDetailsScreen(navController: NavController) {
 
 
 @Composable
-fun StateGridScreen(navController: NavController, stateCityList: StateCityDataC) {
-    val groupedByState = stateCityList.groupBy { it.State }
+fun StateGridScreen(navController: NavController) {
+
+    val gson = Gson()
+
+    val stateCity1: StateCityDataC =
+        gson.fromJson(CityStateData, StateCityDataC::class.java)
+
+    val groupedByState = stateCity1.groupBy { it.State } // Group cities by state
+
     val gridState = rememberLazyGridState()
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2), // 2 columns per row
-        state = gridState,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        groupedByState.forEach { (state, cities) ->
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(240.dp)
-                        .padding(6.dp)
-                        .clickable {
-                            val stateData = ArrayList(cities) // Convert to Parcelable list
-                            navController.currentBackStackEntry?.savedStateHandle?.set(
-                                "stateData",
-                                stateData
-                            )
-                            navController.navigate("state_details")
-                        },
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(6.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Box(modifier = Modifier.padding(12.dp)) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            // Use the function to get the image for each state
-                            Image(
-                                painter = painterResource(id = getStateImage(state)),
-                                contentDescription = "$state Image",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(130.dp)
-                                    .clip(RoundedCornerShape(12.dp)),
-                                contentScale = ContentScale.Crop
-                            )
+    Column {
 
-                            Spacer(modifier = Modifier.padding(top = 12.dp))
+        Text(
+            "Explore",
+            modifier = Modifier.fillMaxWidth()
+                .padding(top = 30.dp),
+            textAlign = TextAlign.Center,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
 
-                            Text(
-                                text = state,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.Black,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                textAlign = TextAlign.Center
-                            )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2), // 2 columns per row
+            state = gridState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            groupedByState.forEach { (state, cities) ->
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp)
+                            .clickable {
+                                val stateData = ArrayList(cities) // Convert to Parcelable list
+                                navController.currentBackStackEntry?.savedStateHandle?.set(
+                                    "stateData",
+                                    stateData
+                                )
+                                navController.navigate("state_details")
+                            },
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(6.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Box(modifier = Modifier.padding(12.dp)) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                // Use the function to get the image for each state
+                                Image(
+                                    painter = painterResource(id = getStateImage(state)),
+                                    contentDescription = "$state Image",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(130.dp)
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+
+                                Spacer(modifier = Modifier.padding(top = 12.dp))
+
+                                Text(
+                                    text = state,
+                                    fontSize = 20.sp,
+                                    maxLines = 2,
+                                    minLines = 2,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+
 }
 
 @DrawableRes

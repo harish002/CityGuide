@@ -7,10 +7,15 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.cityguide.ui.Screens.Screens.FeedbackForm
 import com.example.cityguide.ui.Screens.Screens.LoginScreen
 import com.example.cityguide.ui.Screens.Screens.RegisterScreen
 import com.example.cityguide.ui.Screens.Screens.StateDetailsScreen
+import com.example.cityguide.ui.Screens.Screens.StateGridScreen
 import com.example.cityguide.ui.Screens.Screens.User
+import com.example.fooddonateapp.ui.Screens.Screens.AboutUsScreen
+import com.example.fooddonateapp.ui.Screens.Screens.ContactUsScreen
+import com.example.fooddonateapp.ui.Screens.Screens.EmergencyContactsScreen
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -31,62 +36,40 @@ fun NavGraph(navController: NavHostController) {
                 StateDetailsScreen(navController)
             }
 
-//            composable(
-//                "city_list/{stateName}",
-//                arguments = listOf(navArgument("stateName") { type = NavType.StringType })
-//            ) { backStackEntry ->
-//                val stateName = backStackEntry.arguments?.getString("stateName") ?: ""
-//                val gson = Gson()
-//                val stateCity: StateCity = gson.fromJson(Data, StateCity::class.java)
-//
-//                // Get the list of cities for the selected state
-//                val cities = when (stateName) {
-//                    "Andaman and Nicobar Islands" -> stateCity.AndamanandNicobarIslands
-//                    "Andhra Pradesh" -> stateCity.AndhraPradesh
-//                    "Arunachal Pradesh" -> stateCity.ArunachalPradesh
-//                    "Assam" -> stateCity.Assam
-//                    "Bihar" -> stateCity.Bihar
-//                    "Chandigarh" -> stateCity.Chandigarh
-//                    "Chhattisgarh" -> stateCity.Chhattisgarh
-//                    "Dadra and Nagar Haveli" -> stateCity.DadraandNagarHaveli
-//                    "Delhi" -> stateCity.Delhi
-//                    "Goa" -> stateCity.Goa
-//                    "Gujarat" -> stateCity.Gujarat
-//                    "Haryana" -> stateCity.Haryana
-//                    "Himachal Pradesh" -> stateCity.HimachalPradesh
-//                    "Jammu and Kashmir" -> stateCity.JammuandKashmir
-//                    "Jharkhand" -> stateCity.Jharkhand
-//                    "Karnataka" -> stateCity.Karnataka
-//                    "Kerala" -> stateCity.Kerala
-//                    "Madhya Pradesh" -> stateCity.MadhyaPradesh
-//                    "Maharashtra" -> stateCity.Maharashtra
-//                    "Manipur" -> stateCity.Manipur
-//                    "Meghalaya" -> stateCity.Meghalaya
-//                    "Mizoram" -> stateCity.Mizoram
-//                    "Nagaland" -> stateCity.Nagaland
-//                    "Odisha" -> stateCity.Odisha
-//                    "Puducherry" -> stateCity.Puducherry
-//                    "Punjab" -> stateCity.Punjab
-//                    "Rajasthan" -> stateCity.Rajasthan
-//                    "Tamil Nadu" -> stateCity.TamilNadu
-//                    "Telangana" -> stateCity.Telangana
-//                    "Tripura" -> stateCity.Tripura
-//                    "Uttar Pradesh" -> stateCity.UttarPradesh
-//                    "Uttarakhand" -> stateCity.Uttarakhand
-//                    "West Bengal" -> stateCity.WestBengal
-//                    else -> emptyList()
-//                }
-//
-//                CityListScreen(stateName, cities, navController)
-//            }
-
             composable("register") {
                 RegisterScreen(navController)
             }
+
             composable("user") {
                 User(FirebaseAuth.getInstance(), navController)
-//                DonationList(FirebaseAuth.getInstance()) // Ensure 'voting' is @Composable
             }
+
+            composable("explore")
+            {
+                StateGridScreen(navController)
+            }
+
+            composable("about_us")
+            {
+                AboutUsScreen(navController)
+            }
+
+            composable("contact_us")
+            {
+                ContactUsScreen(navController)
+            }
+
+            composable("feedback")
+            {
+                FeedbackForm(navController)
+            }
+
+            composable("emergency")
+            {
+                EmergencyContactsScreen(navController)
+            }
+
+
         }
     }
 }
